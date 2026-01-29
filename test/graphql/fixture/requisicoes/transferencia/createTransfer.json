@@ -1,0 +1,7 @@
+{
+    "query": "mutation BorrowBook($bookId: Int!, $days: Int) { borrowBook(bookId: $bookId, days: $days) { id memberUsername bookId bookTitle borrowDate dueDate status } }",
+    "variables": {
+        "bookId": 1,
+        "days": 14
+    }
+}

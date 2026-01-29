@@ -1,0 +1,5 @@
+node_modules/
+mochawesome-report/
+.env
+.DS_Store
+test/.DS_Store

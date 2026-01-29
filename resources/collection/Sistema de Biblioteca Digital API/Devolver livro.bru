@@ -1,0 +1,41 @@
+meta {
+  name: Devolver livro
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}/loans/return
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{tokenUsuario}}
+}
+
+body:json {
+  {
+    "bookId": 5
+  }
+}
+
+tests {
+  // POST /loans/return
+  // Endpoint protegido, verifica 200 success, 400 validation, 401 unauthorized
+  test("POST /loans/return - status should be 200, 400 or 401", () => {
+    expect([200, 400, 401]).to.include(res.status);
+  });
+  
+  test("POST /loans/return - content-type JSON and body shape", () => {
+    expect(res.headers["content-type"]).to.contain("application/json");
+    const body = res.body;
+    if (res.status === 200) {
+      expect(body).to.be.an("object");
+      expect(body.message || body.id || body.bookId).to.be.ok;
+    } else {
+      expect(body.message || body.error).to.be.ok;
+    }
+  });
+  
+}

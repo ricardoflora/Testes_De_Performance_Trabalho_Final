@@ -1,0 +1,45 @@
+meta {
+  name: Obter detalhes do livro
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/books/:id
+  body: none
+  auth: none
+}
+
+params:path {
+  id: 5
+}
+
+tests {
+  // GET /books/{id}
+  
+  test("GET /books/{id} - status 200 or 404", () => {
+    expect(res.status).to.satisfy(val => val === 200 || val === 404);
+  });
+  
+  test("GET /books/{id} - content-type and body shape", () => {
+    expect(res.headers["content-type"]).to.contain("application/json");
+  
+    const body = res.body;
+  
+    if (res.status === 200) {
+      expect(body).to.be.an("object");
+  
+      // Verifica id ou título sem usar .or
+      expect(
+        (typeof body.id === "number") ||
+        (typeof body.title === "string") ||
+        (body.description !== undefined)
+      ).to.be.true;
+  
+    } else if (res.status === 404) {
+      expect(body).to.be.an("object");
+      expect(body.message || body.error).to.be.ok;
+    }
+  });
+  
+}

@@ -1,0 +1,53 @@
+meta {
+  name: Autenticar membro
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/members/login
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "username": "{{nomeUsuario}}",
+    "password": "123456"
+  }
+}
+
+script:post-response {
+  try {
+    const body = res.getBody();
+  
+    if (body && body.token) {
+      bru.setEnvVar("tokenUsuario", res.getBody().token);
+      console.log("Token do Usuario salvo:", res.getBody().token);
+    } else {
+      console.warn("Token não encontrado no body:", res.getBody());
+    }
+  } catch (err) {
+    console.error("Erro ao parsear resposta:", err);
+  }
+  
+}
+
+tests {
+  test("Status code is 200", () => {
+      expect(res.status).to.equal(200);
+  });
+  
+  test("Response contains token", () => {
+      expect(res.headers["content-type"]).to.contain("application/json");
+      const data = res.body;
+      expect(data).to.have.property("token");
+      expect(data.token).to.be.a("string");
+      expect(data.token.length).to.be.greaterThan(10);
+  });
+  
+  test("Token has JWT structure", () => {
+      const jwtRegex = /^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$/;
+      expect(res.body.token).to.match(jwtRegex);
+  });
+}

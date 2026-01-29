@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "Sistema de Biblioteca Digital API",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

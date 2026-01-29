@@ -1,0 +1,40 @@
+meta {
+  name: Listar empréstimos
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{baseUrl}}/loans
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{tokenUsuario}}
+}
+
+tests {
+  // GET /loans
+  // Endpoint protegido, verifica 200 or 401, body é array/object de empréstimos
+  test("GET /loans - status 200 or 401", () => {
+    expect([200, 401]).to.include(res.status);
+  });
+  
+  test("GET /loans - content-type JSON and shape", () => {
+    expect(res.headers["content-type"]).to.contain("application/json");
+    const body = res.body;
+    if (res.status === 200) {
+      expect(body).to.satisfy(val => Array.isArray(val) || (typeof val === "object" && val !== null));
+      if (Array.isArray(body)) {
+        body.forEach(entry => {
+          expect(entry.bookId || entry.id).to.be.ok;
+          expect(entry.memberId || entry.userId || entry.dueDate).to.be.ok;
+        });
+      }
+    } else {
+      expect(body.message || body.error).to.be.ok;
+    }
+  });
+  
+}

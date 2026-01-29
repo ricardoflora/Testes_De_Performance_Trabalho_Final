@@ -1,0 +1,48 @@
+meta {
+  name: Emprestar livro
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/loans/borrow
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{tokenUsuario}}
+}
+
+body:json {
+  {
+    "bookId": 5,
+    "days": 2
+  }
+}
+
+tests {
+  // POST /loans/borrow
+  // Endpoint protegido, verifica 201 on success, 400 validation, 401 unauthorized; checa headers e body
+  test("POST /loans/borrow - status should be 201, 400 or 401", () => {
+    expect([201, 400, 401]).to.include(res.status);
+  });
+  
+  test("POST /loans/borrow - content-type JSON", () => {
+    expect(res.headers["content-type"]).to.contain("application/json");
+  });
+  
+  test("POST /loans/borrow - success returns created loan or error message", () => {
+    const body = res.body;
+    if (res.status === 201) {
+      expect(body).to.be.an("object");
+      expect(body.id || body.bookId).to.be.ok;
+      expect(body.bookId).to.satisfy(val => typeof val === "number" || val === undefined);
+    } else if (res.status === 401) {
+      expect(body.message || body.error).to.be.ok;
+    } else {
+      expect(body.message || body.error).to.be.ok;
+    }
+  });
+  
+}

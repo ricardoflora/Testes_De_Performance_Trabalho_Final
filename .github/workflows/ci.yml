@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22.x'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Start Rest Server
+      run: |
+        npm run start-rest &
+        npx wait-on tcp:3000 --timeout 60000
+
+    - name: Run Rest External Tests
+      run: npm run test-rest-external
+
+    - name: Run Rest Controller Tests
+      run: npm run test-rest-controller
+
+    - name: Start GraphQL Server
+      run: |
+        npm run start-graphql &
+        npx wait-on tcp:4000 --timeout 60000
+
+    - name: Run GraphQL External Tests
+      run: npm run test-graphql-external

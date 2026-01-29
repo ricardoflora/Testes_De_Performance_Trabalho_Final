@@ -1,0 +1,40 @@
+meta {
+  name: Empréstimos em atraso
+  type: http
+  seq: 11
+}
+
+get {
+  url: {{baseUrl}}/loans/overdue
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{tokenUsuario}}
+}
+
+tests {
+  // GET /loans/overdue
+  // Endpoint protegido, verifica 200 or 401, retorno é lista de empréstimos em atraso
+  test("GET /loans/overdue - status 200 or 401", () => {
+    expect([200, 401]).to.include(res.status);
+  });
+  
+  test("GET /loans/overdue - content-type JSON and overdue list shape", () => {
+    expect(res.headers["content-type"]).to.contain("application/json");
+    const body = res.body;
+    if (res.status === 200) {
+      expect(body).to.satisfy(val => Array.isArray(val) || (typeof val === "object" && val !== null));
+      if (Array.isArray(body)) {
+        body.forEach(item => {
+          expect(item.bookId || item.id).to.be.ok;
+          expect(item.dueDate || item.overdue).to.be.ok;
+        });
+      }
+    } else {
+      expect(body.message || body.error).to.be.ok;
+    }
+  });
+  
+}

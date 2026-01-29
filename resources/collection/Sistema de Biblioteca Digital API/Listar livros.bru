@@ -1,0 +1,36 @@
+meta {
+  name: Listar livros
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/books
+  body: none
+  auth: inherit
+}
+
+tests {
+  // GET /books
+  // Verifica 200 e que a resposta é lista de livros (array ou objeto)
+  test("GET /books - status 200", () => {
+    expect(res.status).to.equal(200);
+  });
+  
+  test("GET /books - content-type is JSON and body is array/object", () => {
+    expect(res.headers["content-type"]).to.contain("application/json");
+    const body = res.body;
+    expect(body).to.satisfy(val => Array.isArray(val) || (typeof val === "object" && val !== null));
+  });
+  
+  test("GET /books - each book has id or title when list", () => {
+    const body = res.body;
+    if (Array.isArray(body)) {
+      body.forEach(book => {
+        expect(book).to.be.an("object");
+        expect(book.id || book.title).to.be.ok;
+      });
+    }
+  });
+  
+}

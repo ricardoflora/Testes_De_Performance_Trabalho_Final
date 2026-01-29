@@ -1,0 +1,39 @@
+meta {
+  name: Buscar livros
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/books/search?q=Senhor
+  body: none
+  auth: none
+}
+
+params:query {
+  q: Senhor
+}
+
+tests {
+  // GET /books/search?q=<term>
+  // Verifica 200, query param obrigatório, resultado é array/object e cada item tem id/title
+  test("GET /books/search - status 200", () => {
+    expect(res.status).to.equal(200);
+  });
+  
+  test("GET /books/search - content-type JSON and body is array or object", () => {
+    expect(res.headers["content-type"]).to.contain("application/json");
+    const body = res.body;
+    expect(body).to.satisfy(val => Array.isArray(val) || (typeof val === "object" && val !== null));
+  });
+  
+  test("GET /books/search - results contain id or title", () => {
+    const body = res.body;
+    if (Array.isArray(body)) {
+      body.forEach(item => {
+        expect(item.id || item.title).to.be.ok;
+      });
+    }
+  });
+  
+}

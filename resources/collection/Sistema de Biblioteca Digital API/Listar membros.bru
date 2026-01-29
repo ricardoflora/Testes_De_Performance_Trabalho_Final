@@ -1,0 +1,36 @@
+meta {
+  name: Listar membros
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/members
+  body: none
+  auth: none
+}
+
+tests {
+  // GET /members
+  // Verifica 200 e que o retorno é array ou objeto (lista), e cada item tem username ou id
+  test("GET /members - status 200", () => {
+    expect(res.status).to.equal(200);
+  });
+  
+  test("GET /members - content-type JSON and body is array or object", () => {
+    expect(res.headers["content-type"]).to.contain("application/json");
+    const body = res.body;
+    expect(body).to.satisfy(val => Array.isArray(val) || (typeof val === "object" && val !== null));
+  });
+  
+  test("GET /members - each member has id or username when list", () => {
+    const body = res.body;
+    if (Array.isArray(body)) {
+      body.forEach(item => {
+        expect(item).to.be.an("object");
+        expect(item.id || item.username).to.be.ok;
+      });
+    }
+  });
+  
+}

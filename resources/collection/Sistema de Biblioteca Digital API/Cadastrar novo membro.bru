@@ -1,0 +1,67 @@
+meta {
+  name: Cadastrar novo membro
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/members/register
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "username": "{{nomeUsuario}}",
+    "password": "123456",
+    "membershipType": "standard"
+  }
+}
+
+script:pre-request {
+  // Função para gerar nome aleatório
+  function gerarNomeAleatorio() {
+    const primeiros = ["Ana", "João", "Maria", "Carlos", "Fernanda", "Lucas", "Patrícia", "Diego", "Juliana", "Rafael"];
+    const sobrenomes = ["Silva", "Souza", "Oliveira", "Pereira", "Costa", "Santos", "Gomes", "Rodrigues", "Almeida", "Lima"];
+    
+    const primeiro = primeiros[Math.floor(Math.random() * primeiros.length)];
+    const sobrenome = sobrenomes[Math.floor(Math.random() * sobrenomes.length)];
+    return `${primeiro} ${sobrenome}`;
+  }
+  
+  // Gerar valores dinâmicos
+  const nomeUsuario = gerarNomeAleatorio();
+  
+  // Salvar nas variáveis de ambiente do Bruno (escopo atual)
+  bru.setVar("nomeUsuario", nomeUsuario);
+  
+  // (Opcional) log no console do Bruno para conferência
+  console.log(`Nome gerado: ${nomeUsuario}`);
+  
+}
+
+tests {
+  // POST /members/register
+  // Verifica sucesso 201, valida content-type e forma do body (objeto com id ou message)
+  // Também checa erros 400 possíveis
+  test("POST /members/register - status 201 on success or 400 on bad request", () => {
+    expect([201, 400]).to.include(res.status);
+  });
+  
+  test("POST /members/register - response content-type is JSON", () => {
+    expect(res.headers["content-type"]).to.contain("application/json");
+  });
+  
+  test("POST /members/register - body is object and contains expected fields when created", () => {
+    const body = res.body;
+    expect(body).to.be.an("object");
+    if (res.status === 201) {
+      // Verifica presença de id ou confirmação
+      expect(body.id || body.message || body.username).to.be.ok;
+    } else {
+      // Quando 400, espera mensagem de erro
+      expect(body.message || body.error).to.be.ok;
+    }
+  });
+  
+}

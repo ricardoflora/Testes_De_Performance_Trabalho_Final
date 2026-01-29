@@ -1,0 +1,13 @@
+ {
+  "data": {
+    "borrowBook": {
+      "id": 1,
+      "memberUsername": "alexandre",
+      "bookId": 4,
+      "bookTitle": "Harry Potter e a Pedra Filosofal",
+      "borrowDate": "2025-09-06T17:42:16.559Z",
+      "dueDate": "2025-09-20T17:42:16.559Z",
+      "status": "active"
+    }
+  }
+}
